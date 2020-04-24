@@ -5,9 +5,9 @@ const SecalotUsb = function () {
   this.timeoutSeconds = 120;
 };
 
-SecalotUsb.webSafe64 = (base64) =>
+SecalotUsb.webSafe64 = base64 =>
   base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-SecalotUsb.normal64 = (base64) =>
+SecalotUsb.normal64 = base64 =>
   // eslint-disable-next-line
   base64.replace(/\-/g, '+').replace(/_/g, '/') +
   '=='.substring(0, (3 * base64.length) % 4);
@@ -67,7 +67,7 @@ SecalotUsb.prototype.exchange = function (apduHex, callback) {
   u2f
     .sign([key], this.timeoutSeconds)
     .then(localCallback)
-    .catch((err) => {
+    .catch(err => {
       callback(undefined, err);
     });
 };
