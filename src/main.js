@@ -43,7 +43,7 @@ const vue = new Vue({
   router,
   store,
   vuetify,
-  render: (h) => h(getApp())
+  render: h => h(getApp())
 });
 
 const integration = new Integrations.Vue({
@@ -76,9 +76,9 @@ Sentry.init({
       service: service,
       walletType: identifier
     };
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       vue.$eventHub.$emit('issueModal', event, resolve);
-    }).then((res) => {
+    }).then(res => {
       return res === true ? event : null;
     });
   }

@@ -215,7 +215,7 @@ const webRoutes = [
     ]
   }
 ];
-const configRoutes = (routes) => {
+const configRoutes = routes => {
   return routes.concat(webRoutes);
 };
 export { app, configRoutes };
