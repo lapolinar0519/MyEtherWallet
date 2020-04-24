@@ -323,6 +323,7 @@ export default class SwapProviders {
     fromAddress,
     refundAddress
   }) {
+    // eslint-disable-next-line no-useless-catch
     try {
       const swapDetails = {
         provider: providerDetails.provider,
