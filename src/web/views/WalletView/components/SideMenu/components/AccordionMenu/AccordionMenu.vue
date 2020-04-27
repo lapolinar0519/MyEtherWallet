@@ -15,7 +15,7 @@
                 height="23"
                 :src="i.iconLight"
               />
-              <div>{{ i.name }}</div>
+              <div class="menu-name">{{ i.name }}</div>
             </div>
           </v-list-item>
 
@@ -157,11 +157,11 @@ export default {
 
 .accordion-menu-container {
   .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
-    color: white !important;
+    //color: white !important;
   }
 
   .theme--dark.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
-    color: theme-dark-text-color !important;
+    //color: theme-dark-text-color !important;
   }
 
   .theme--dark.v-list-item.v-list-item--active {
@@ -176,6 +176,10 @@ export default {
   .dark {
     display: block;
   }
+
+  .menu-name {
+    color: $theme-dark--text-color;
+  }
 }
 
 .v-list-item.v-list-item--active {
@@ -184,6 +188,10 @@ export default {
   }
   .dark {
     display: none;
+  }
+
+  .menu-name {
+    color: white;
   }
 }
 </style>
