@@ -1,38 +1,40 @@
 <template>
-  <div class="mew-component--accordion-menu-container user-select--none">
+  <div
+    ref="menu"
+    class="mew-component--accordion-menu-container user-select--none"
+  >
     <div v-for="(mainItems, mainKey) in menuItems" :key="mainKey">
-      <!-- Main menus -->
+      <!-- Main menus ======================================== -->
       <div
-        :ref="getMenuRef(mainItems.url)"
-        class="cursor--pointer"
+        :ref="getMenuRef('main' + mainItems.url)"
+        class="main-menu cursor--pointer d-flex align-center"
         @click="routerPush(mainItems.url)"
       >
-        <div class="d-flex align-center">
-          <img
-            class="dark mr-3"
-            width="26"
-            height="26"
-            :src="mainItems.iconDark"
-          />
-          <img
-            class="light mr-3"
-            width="23"
-            height="23"
-            :src="mainItems.iconLight"
-          />
-          <div class="white--text">{{ mainItems.name }}</div>
-        </div>
-        <!-- Sub menus -->
-        <div v-for="(subItems, subKey) in mainItems.children" :key="subKey">
-          <div
-            :ref="getMenuRef(subItems.url)"
-            class="submenu white--text cursor--pointer"
-            @click="
-              routerPush(subItems.url, getMenuRef('parent' + mainItems.url))
-            "
-          >
-            {{ subItems.name }}
-          </div>
+        <img
+          class="dark mr-3"
+          width="26"
+          height="26"
+          :src="mainItems.iconDark"
+        />
+        <img
+          class="light mr-3"
+          width="23"
+          height="23"
+          :src="mainItems.iconLight"
+        />
+        {{ mainItems.name }}
+      </div>
+
+      <!-- Sub menus ======================================== -->
+      <div v-if="mainItems.children" class="sub-menu">
+        <div
+          v-for="(subItems, subKey) in mainItems.children"
+          :key="subKey"
+          :ref="getMenuRef(subItems.url)"
+          class="cursor--pointer"
+          @click="routerPush(subItems.url)"
+        >
+          {{ subItems.name }}
         </div>
       </div>
     </div>
@@ -59,11 +61,8 @@ import SignMessageLight from '@/assets/images/icons/icon-message-enable.png';
 import SignMessageDark from '@/assets/images/icons/icon-message-disable.png';
 
 export default {
-  components: {},
   data() {
     return {
-      activeMenu: 3,
-      currentURL: '',
       menuItems: [
         {
           name: 'Dashboard',
@@ -128,30 +127,33 @@ export default {
       ]
     };
   },
-  computed: {},
   watch: {
-    /*
-    $route(to, from) {
-      console.log(to);
-      console.log(from);
+    $route(to) {
+      this.removeActiveClasses();
+
+      const menuItemRef = this.getMenuRef(to.path);
+
+      if (this.$refs[menuItemRef]) {
+        this.$refs[menuItemRef][0].classList.add('active');
+        this.$refs[menuItemRef][0].parentNode.parentNode.classList.add(
+          'active'
+        );
+      } else {
+        this.$refs['main' + menuItemRef][0].parentNode.classList.add('active');
+      }
     }
-    */
-  },
-  created() {
-    this.currentURL = this.$route.path;
-    console.log(this.$refs);
   },
   methods: {
-    getMenuRef(url) {
-      if (url) {
-        return url.replace(/[^\w\s]/gi, '_');
+    removeActiveClasses() {
+      const allActiveClasses = this.$refs['menu'].querySelectorAll('.active');
+      for (let i = 0; i < allActiveClasses.length; i++) {
+        allActiveClasses[i].classList.remove('active');
       }
-      return 'aaa';
-
-      //return sourceString.replace('/', '');
+    },
+    getMenuRef(url) {
+      return url.replace(/[^\w\s]/gi, '_');
     },
     routerPush(url) {
-      this.currentURL = url;
       this.$router.push({ path: url }, () => {});
     }
   }
@@ -160,8 +162,17 @@ export default {
 
 <style lang="scss" scoped>
 @import '@/assets/styles/GlobalVariables.scss';
-.main-item,
-.sub-item {
+.main-menu,
+.sub-menu {
   color: white;
+}
+
+.sub-menu {
+  max-height: 0px;
+  overflow: hidden;
+}
+
+.active .sub-menu {
+  max-height: 500px;
 }
 </style>
