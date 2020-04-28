@@ -1,49 +1,37 @@
 <template>
-  <div class="accordion-menu-container user-select--none">
-    <v-list color="transparent">
-      <v-list-item-group v-model="activeMenu" mandatory>
-        <template v-for="(i, key1) in menuItems">
-          <v-list-item v-if="i.url" :key="key1">
-            <div
-              class="cursor--pointer d-flex align-center"
-              @click="routerPush(i.url)"
-            >
-              <img class="dark mr-3" width="26" height="26" :src="i.iconDark" />
-              <img
-                class="light mr-3"
-                width="23"
-                height="23"
-                :src="i.iconLight"
-              />
-              <div class="menu-name">{{ i.name }}</div>
-            </div>
-          </v-list-item>
+  <div class="mew-component--accordion-menu-container user-select--none">
+    <div v-for="(mainItems, mainKey) in menuItems" :key="mainKey">
+      <div
+        class="cursor--pointer d-flex align-center"
+        @click="routerPush(mainItems.url)"
+      >
+        <img
+          class="dark mr-3"
+          width="26"
+          height="26"
+          :src="mainItems.iconDark"
+        />
+        <img
+          class="light mr-3"
+          width="26"
+          height="26"
+          :src="mainItems.iconLight"
+        />
+        <div class="menu-name">{{ mainItems.name }}</div>
+      </div>
 
-          <v-list-group v-else :key="key1">
-            <template v-slot:activator>
-              <v-list-item-title class="cursor--pointer d-flex align-center">
-                <img width="26" height="26" :src="i.iconDark" class="mr-3" />
-                <img width="23" height="23" :src="i.iconLight" class="mr-3" />
-                <div>{{ i.name }}</div>
-              </v-list-item-title>
-            </template>
-
-            <v-list-item-content
-              v-for="(c, key2) in i.children"
-              :key="key2"
-              class="py-2"
-            >
-              <div
-                class="menu-sub-item cursor--pointer"
-                @click="routerPush(c.url)"
-              >
-                {{ c.name }}
-              </div>
-            </v-list-item-content>
-          </v-list-group>
-        </template>
-      </v-list-item-group>
-    </v-list>
+      <v-list-item-content
+        v-for="(subItems, subKey) in mainItems.children"
+        :key="subKey"
+      >
+        <div
+          class="menu-sub-item cursor--pointer"
+          @click="routerPush(subItems.url)"
+        >
+          {{ subItems.name }}
+        </div>
+      </v-list-item-content>
+    </div>
   </div>
 </template>
 
@@ -134,6 +122,12 @@ export default {
       ]
     };
   },
+  watch: {
+    $route(to, from) {
+      console.log(to);
+      console.log(from);
+    }
+  },
   created() {
     this.currentURL = this.$route.path;
   },
@@ -147,51 +141,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.menu-sub-item {
-  padding-left: 51px;
-}
-</style>
-
-<style lang="scss">
 @import '@/assets/styles/GlobalVariables.scss';
-
-.accordion-menu-container {
-  .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
-    //color: white !important;
-  }
-
-  .theme--dark.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
-    //color: theme-dark-text-color !important;
-  }
-
-  .theme--dark.v-list-item.v-list-item--active {
-    color: $emerald !important;
-  }
-}
-
-.v-list-item:not(.v-list-item--active) {
-  .light {
-    display: none;
-  }
-  .dark {
-    display: block;
-  }
-
-  .menu-name {
-    color: $theme-dark--text-color;
-  }
-}
-
-.v-list-item.v-list-item--active {
-  .light {
-    display: block;
-  }
-  .dark {
-    display: none;
-  }
-
-  .menu-name {
-    color: white;
-  }
-}
 </style>
