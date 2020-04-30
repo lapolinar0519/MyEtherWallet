@@ -7,7 +7,7 @@
       <!-- Main menus ======================================== -->
       <div
         :ref="getMenuRef('main' + mainItems.url)"
-        class="main-menu cursor--pointer d-flex align-center"
+        class="main-menu cursor--pointer d-flex align-center mt-4"
         @click="routerPush(mainItems.url)"
       >
         <img
@@ -26,12 +26,12 @@
       </div>
 
       <!-- Sub menus ======================================== -->
-      <div v-if="mainItems.children" class="sub-menu">
+      <div v-if="mainItems.children" class="sub-menu pl-12">
         <div
           v-for="(subItems, subKey) in mainItems.children"
           :key="subKey"
           :ref="getMenuRef(subItems.url)"
-          class="cursor--pointer"
+          class="cursor--pointer mt-3"
           @click="routerPush(subItems.url)"
         >
           {{ subItems.name }}
@@ -164,15 +164,38 @@ export default {
 @import '@/assets/styles/GlobalVariables.scss';
 .main-menu,
 .sub-menu {
-  color: white;
+  color: $gray-1;
+  .active {
+    color: white;
+  }
+}
+.active {
+  .main-menu {
+    color: white;
+  }
 }
 
 .sub-menu {
   max-height: 0px;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .active .sub-menu {
-  max-height: 500px;
+  max-height: 150px;
+}
+
+.light {
+  display: none;
+}
+
+.active {
+  .light {
+    display: block;
+  }
+
+  .dark {
+    display: none;
+  }
 }
 </style>
