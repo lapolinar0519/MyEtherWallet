@@ -10,8 +10,8 @@
     </div>
     <WalletCard />
     <BuyEthButton class="mt-2 mb-6" />
-    <AccordionMenu />
-    <Divider class="my-4 mx-1" />
+    <AccordionMenu class="mt-4" />
+    <Divider class="my-5 mx-1" />
     <SystemMenu />
     <ThemeSwitch class="px-5 mt-8" />
   </v-sheet>
