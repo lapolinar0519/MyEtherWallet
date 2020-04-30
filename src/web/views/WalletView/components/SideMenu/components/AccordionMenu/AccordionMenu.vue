@@ -128,10 +128,24 @@ export default {
     };
   },
   watch: {
-    $route(to) {
+    $route() {
+      this.markActiveMenu();
+    }
+  },
+  mounted() {
+    this.markActiveMenu();
+  },
+  methods: {
+    removeActiveClasses() {
+      const allActiveClasses = this.$refs['menu'].querySelectorAll('.active');
+      for (let i = 0; i < allActiveClasses.length; i++) {
+        allActiveClasses[i].classList.remove('active');
+      }
+    },
+    markActiveMenu() {
       this.removeActiveClasses();
 
-      const menuItemRef = this.getMenuRef(to.path);
+      const menuItemRef = this.getMenuRef(this.$route.path);
 
       if (this.$refs[menuItemRef]) {
         this.$refs[menuItemRef][0].classList.add('active');
@@ -140,14 +154,6 @@ export default {
         );
       } else {
         this.$refs['main' + menuItemRef][0].parentNode.classList.add('active');
-      }
-    }
-  },
-  methods: {
-    removeActiveClasses() {
-      const allActiveClasses = this.$refs['menu'].querySelectorAll('.active');
-      for (let i = 0; i < allActiveClasses.length; i++) {
-        allActiveClasses[i].classList.remove('active');
       }
     },
     getMenuRef(url) {
@@ -178,7 +184,7 @@ export default {
 .sub-menu {
   max-height: 0px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .active .sub-menu {
