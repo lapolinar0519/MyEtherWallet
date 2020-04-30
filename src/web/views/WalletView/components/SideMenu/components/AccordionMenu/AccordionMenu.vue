@@ -7,7 +7,7 @@
       <!-- Main menus ======================================== -->
       <div
         :ref="getMenuRef('main' + mainItems.url)"
-        class="main-menu cursor--pointer d-flex align-center mt-4"
+        class="main-menu cursor--pointer d-flex align-center px-3 py-2"
         @click="routerPush(mainItems.url)"
       >
         <img
@@ -18,23 +18,29 @@
         />
         <img
           class="light mr-3"
-          width="23"
-          height="23"
+          width="26"
+          height="26"
           :src="mainItems.iconLight"
         />
-        {{ mainItems.name }}
+        <div>{{ mainItems.name }}</div>
+        <v-icon v-if="mainItems.children" class="ml-auto dark">
+          mdi-chevron-down
+        </v-icon>
+        <v-icon v-if="mainItems.children" class="ml-auto light">
+          mdi-chevron-up
+        </v-icon>
       </div>
 
       <!-- Sub menus ======================================== -->
-      <div v-if="mainItems.children" class="sub-menu pl-12">
+      <div v-if="mainItems.children" class="sub-menu">
         <div
           v-for="(subItems, subKey) in mainItems.children"
           :key="subKey"
           :ref="getMenuRef(subItems.url)"
-          class="cursor--pointer mt-3"
+          class="cursor--pointer pl-12 pr-3 py-2"
           @click="routerPush(subItems.url)"
         >
-          {{ subItems.name }}
+          <span class="pl-2">{{ subItems.name }}</span>
         </div>
       </div>
     </div>
@@ -168,15 +174,19 @@ export default {
 
 <style lang="scss" scoped>
 @import '@/assets/styles/GlobalVariables.scss';
+.main-menu:hover,
+.sub-menu > *:hover {
+  background-color: #0000001f;
+}
+
 .main-menu,
 .sub-menu {
-  color: $gray-1;
-  .active {
-    color: white;
+  * {
+    color: $gray-1;
   }
 }
 .active {
-  .main-menu {
+  .main-menu * {
     color: white;
   }
 }
@@ -185,6 +195,9 @@ export default {
   max-height: 0px;
   overflow: hidden;
   transition: all 0.2s ease;
+  .active * {
+    color: white;
+  }
 }
 
 .active .sub-menu {
