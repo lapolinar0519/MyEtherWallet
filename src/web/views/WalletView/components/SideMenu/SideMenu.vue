@@ -13,7 +13,8 @@
     <AccordionMenu class="mt-4" />
     <Divider class="my-5 mx-1" />
     <SystemMenu />
-    <ThemeSwitch class="px-5 mt-8" />
+    <Divider class="my-5 mx-1" />
+    <ThemeSwitch class="px-5" />
   </v-sheet>
 </template>
 
@@ -45,5 +46,8 @@ export default {
   width: 300px;
   min-height: 100vh;
   color: white;
+}
+
+.v-input--selection-controls__ripple:before {
 }
 </style>

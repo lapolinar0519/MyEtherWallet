@@ -9,7 +9,7 @@
     />
     <!-- For Development Only ------------------------------------------------->
     <div class="dev-only d-flex align-center">
-      <div class="text-color--dark-sacramento mr-5">
+      <div class="white--text mr-5">
         For development only --->
       </div>
       <v-switch
@@ -47,7 +47,7 @@ export default {
   top: 0px;
   right: 0px;
   z-index: 99999999;
-  background-color: #00b9ff;
+  background-color: #8b8b8b;
   padding: 0 10px;
   border-radius: 0 0 0 10px;
   box-shadow: 0 0 10px #0000004a;
@@ -58,6 +58,9 @@ export default {
 .mew-component--theme-switch {
   .v-input--switch .v-input--switch__track {
     color: #ffffff91 !important;
+  }
+  .theme--light.v-label {
+    color: white;
   }
 }
 </style>
