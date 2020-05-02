@@ -59,15 +59,33 @@ export default {
   .v-input--switch .v-input--switch__track {
     color: #ffffff91 !important;
   }
+  .v-label {
+    font-size: 14px;
+  }
   .theme--light.v-label {
     color: white;
   }
 }
 
-.v-input--selection-controls__ripple::after {
-  content: '7';
+.theme--light.v-input--switch__thumb::after {
+  content: '☀';
+  font-size: 20px;
   position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  color: black;
+  text-align: center;
+}
+
+.theme--dark.v-input--switch__thumb::after {
+  content: '☾';
+  font-size: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  color: black;
+  text-align: center;
 }
 </style>
