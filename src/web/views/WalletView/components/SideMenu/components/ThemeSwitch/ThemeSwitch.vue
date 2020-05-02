@@ -63,4 +63,11 @@ export default {
     color: white;
   }
 }
+
+.v-input--selection-controls__ripple::after {
+  content: '7';
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 </style>

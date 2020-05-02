@@ -15,6 +15,7 @@
     <SystemMenu />
     <Divider class="my-5 mx-1" />
     <ThemeSwitch class="px-5" />
+    <Version class="px-5" />
   </v-sheet>
 </template>
 
@@ -24,6 +25,7 @@ import BuyEthButton from './components/BuyEthButton';
 import AccordionMenu from './components/AccordionMenu';
 import SystemMenu from './components/SystemMenu';
 import ThemeSwitch from './components/ThemeSwitch';
+import Version from './components/Version';
 import Divider from './components/Divider';
 
 export default {
@@ -33,6 +35,7 @@ export default {
     AccordionMenu,
     SystemMenu,
     ThemeSwitch,
+    Version,
     Divider
   }
 };
