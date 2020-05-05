@@ -1,7 +1,7 @@
 <template>
   <WhiteSheet>
     <InterfaceWrap title="Send Transaction">
-      Contents!!!!
+      <InputSearchCoins label="Type" :items="coins" />
     </InterfaceWrap>
   </WhiteSheet>
 </template>
@@ -11,11 +11,23 @@
 import WhiteSheet from '@/web/components/Common/WhiteSheet';
 import InterfaceWrap from '@/web/components/InterfaceWraps/InterfaceWrap1';
 //import StdButton from '@/web/components/StdButton';
+import InputSearchCoins from '@/components/Inputs/InputSearchCoins';
 
 export default {
-  components: { WhiteSheet, InterfaceWrap },
+  components: { WhiteSheet, InterfaceWrap, InputSearchCoins },
   data() {
-    return {};
+    return {
+      coins: [
+        {
+          name: 'Ethereum',
+          value: 'eth'
+        },
+        {
+          name: 'Bitcoin',
+          value: 'btc'
+        }
+      ]
+    };
   }
 };
 </script>
