@@ -13,7 +13,10 @@
     <template v-slot:item="data">
       <template>
         <v-list-item-content class="pa-0">
-          <v-list-item-title>{{ data.item.name }}</v-list-item-title>
+          <v-list-item-title>
+            <span class="text-uppercase">{{ data.item.value }}</span> -
+            {{ data.item.name }}
+          </v-list-item-title>
           <v-list-item-subtitle>{{ data.item.group }}</v-list-item-subtitle>
         </v-list-item-content>
       </template>
