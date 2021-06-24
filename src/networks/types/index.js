@@ -1,5 +1,9 @@
 import AKA from './AKA.js';
+import AQUA from './AQUA.js';
+import AVAX from './AVAX.js';
+import AVAXTEST from './AVAXTEST.js';
 import ATH from './ATH.js';
+import BSC from './BSC.js';
 import CLO from './CLO.js';
 import EGEM from './EGEM.js';
 import ELLA from './ELLA.js';
@@ -14,6 +18,7 @@ import GO from './GO.js';
 import IOLITE from './IOLITE.js';
 import KOV from './KOV.js';
 import META from './META.js';
+import MATIC from './MATIC.js';
 import MIX from './MIX.js';
 import MUSIC from './MUSIC.js';
 import PIRL from './PIRL.js';
@@ -34,10 +39,15 @@ import ERE from './ERE.js';
 import PRKL from './PRKL.js';
 import FUSE from './FUSE.js';
 import EWT from './EWT.js';
+import XDAI from './XDAI.js';
 
 export {
   AKA,
+  AQUA,
+  AVAX,
+  AVAXTEST,
   ATH,
+  BSC,
   CLO,
   EGEM,
   ELLA,
@@ -51,6 +61,7 @@ export {
   GO,
   IOLITE,
   KOV,
+  MATIC,
   META,
   MIX,
   MUSIC,
@@ -71,5 +82,6 @@ export {
   ERE,
   PRKL,
   FUSE,
-  EWT
+  EWT,
+  XDAI
 };

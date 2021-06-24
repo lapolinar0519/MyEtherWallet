@@ -22,7 +22,9 @@ import {
   UBQ,
   TT,
   PHT,
-  ERE
+  ERE,
+  AVAX,
+  AVAXTEST
 } from '@/networks/types';
 import {
   ledgerEthereum,
@@ -50,7 +52,8 @@ import {
   rskTestnet,
   thundercore,
   lightstreamsNetwork,
-  ethercore
+  ethercore,
+  avalancheC
 } from '../../bip44/paths';
 const appList = [
   {
@@ -172,6 +175,16 @@ const appList = [
     network: ERE,
     prefixes: ["m/44'/466'"],
     paths: [ethercore]
+  },
+  {
+    network: AVAX,
+    prefixes: ["m/44'/60'/0'"],
+    paths: [avalancheC]
+  },
+  {
+    network: AVAXTEST,
+    prefixes: ["m/44'/60'/0'"],
+    paths: [avalancheC]
   }
 ];
 export default appList;

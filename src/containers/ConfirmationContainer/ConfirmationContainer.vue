@@ -15,6 +15,7 @@
       :data="data"
       :nonce="nonce"
       :show-gas-warning="showGasWarning"
+      :show-low-gas-warning="showLowGasWarning"
     />
     <confirm-collection-modal
       v-if="fromAddress !== null"
@@ -25,6 +26,7 @@
       :un-signed-array="unSignedArray"
       :sending="sending"
       :show-gas-warning="showCollectionGasWarning"
+      :show-collection-low-gas-warning="showCollectionLowGasWarning"
     />
     <confirm-modal
       v-if="fromAddress !== null"
@@ -134,7 +136,7 @@ export default {
       nonce: '',
       gasLimit: '21000',
       data: '0x',
-      gasPrice: 0,
+      gasPrice: '0',
       parsedBalance: 0,
       toAddress: '',
       transactionFee: '',
@@ -177,7 +179,8 @@ export default {
       'web3',
       'account',
       'network',
-      'gasLimitWarning'
+      'gasLimitWarning',
+      'ethGasPrice'
     ]),
     fromAddress() {
       if (this.account) {
@@ -187,12 +190,24 @@ export default {
     },
     showCollectionGasWarning() {
       const foundGasAboveLimit = this.unSignedArray.find(item => {
-        return BigNumber(item.gasPrice).gte(this.gasLimitWarning);
+        const parsedGasPrice = this.web3.utils.fromWei(item.gasPrice, 'gwei');
+        return BigNumber(parsedGasPrice).gte(this.gasLimitWarning);
       });
       return foundGasAboveLimit ? true : false;
     },
     showGasWarning() {
       return this.gasPrice >= this.gasLimitWarning;
+    },
+    showLowGasWarning() {
+      return Math.floor(this.ethGasPrice * 0.75) >= this.gasPrice;
+    },
+    showCollectionLowGasWarning() {
+      const foundGasAboveLimit = this.unSignedArray.find(item => {
+        return BigNumber(Math.floor(this.ethGasPrice * 0.75)).gte(
+          item.gasPrice
+        );
+      });
+      return foundGasAboveLimit ? true : false;
     }
   },
   watch: {
@@ -510,8 +525,9 @@ export default {
       this.nonce = tx.nonce === '0x' ? 0 : new BigNumber(tx.nonce).toFixed();
       this.data = tx.data;
       this.gasLimit = new BigNumber(tx.gas).toFixed();
-      this.gasPrice = parseInt(
-        unit.fromWei(new BigNumber(tx.gasPrice).toFixed(), 'gwei')
+      this.gasPrice = unit.fromWei(
+        new BigNumber(tx.gasPrice).toFixed(),
+        'gwei'
       );
       this.toAddress = tx.to;
       this.amount = tx.value === '0x' ? '0' : new BigNumber(tx.value).toFixed();
@@ -626,7 +642,7 @@ export default {
       this.nonce = '';
       this.gasLimit = '21000';
       this.data = '0x';
-      this.gasPrice = 0;
+      this.gasPrice = '0';
       this.parsedBalance = 0;
       this.toAddress = '';
       this.transactionFee = '';

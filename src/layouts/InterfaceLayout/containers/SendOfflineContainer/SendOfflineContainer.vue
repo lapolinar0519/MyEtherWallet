@@ -59,7 +59,7 @@
           <div class="the-form gas-amount">
             <input
               v-model="toData"
-              :disabled="selectedCoinType.symbol !== network.type.name"
+              :disabled="selectedCoinType.symbol !== network.type.currencyName"
               type="string"
               placeholder="e.g. 0x65746865726d696e652d657531"
             />
@@ -199,7 +199,6 @@ import store from 'store';
 import { Misc, Toast } from '@/helpers';
 import utils from 'web3-utils';
 import DropDownAddressSelector from '@/components/DropDownAddressSelector';
-import { getGasBasedOnType } from '@/helpers/gasMultiplier';
 
 export default {
   components: {
@@ -315,9 +314,6 @@ export default {
     }
   },
   watch: {
-    highestGas(newVal) {
-      this.localGasPrice = getGasBasedOnType(newVal);
-    },
     nonce(newVal) {
       this.localNonce = newVal;
     },

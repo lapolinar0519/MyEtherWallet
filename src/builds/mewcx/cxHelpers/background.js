@@ -3,7 +3,7 @@ import { isAddress, toChecksumAddress } from '@/helpers/addressUtils';
 import Misc from '@/helpers/misc';
 import { extractRootDomain } from './extractRootDomain';
 import MiddleWare from '@/wallets/web3-provider/middleware';
-import localStorage from 'store';
+import locStore from 'store';
 import {
   mewCxFetchAccounts,
   mewCxSignTx,
@@ -101,14 +101,15 @@ chrome.storage.sync.get(null, networkChanger);
 chrome.storage.onChanged.addListener(items => {
   Object.keys(items).forEach(item => {
     if (isAddress(item)) {
-      const currentNotifications = JSON.parse(
-        localStorage.getItem('notifications')
-      );
-      currentNotifications[item] = [];
-      localStorage.setItem(
-        'notifications',
-        JSON.stringify(currentNotifications)
-      );
+      const storedNotifications = locStore.get('notifications') || {};
+      const currentNotifications = storedNotifications;
+      if (items[item].hasOwnProperty('newValue')) {
+        currentNotifications[item] = [];
+        locStore.set('notifications', currentNotifications);
+      } else {
+        delete currentNotifications[item];
+        locStore.set('notifications', currentNotifications);
+      }
     }
 
     if (
@@ -215,22 +216,47 @@ function onInstalledCb() {
 
 function onStartupCb() {
   onInstalledCb();
+  const hasParsedAddress = locStore.get('doneReparsingAddress');
+  const hasParsedNotifications = locStore.get('doneReparsingNetwork');
+
   // redo stored addresses to checksum.
-  chrome.storage.sync.get(null, obj => {
-    const objKeys = Object.keys(obj);
-    const newStore = {};
-    if (objKeys.length > 0) {
-      objKeys.forEach(item => {
-        if (isAddress(item)) {
-          newStore[toChecksumAddress(item)] = obj[item];
-          chrome.storage.sync.remove(item);
-        } else {
-          newStore[item] = obj[item];
-        }
-      });
-      chrome.storage.sync.set(newStore);
-    }
-  });
+  if (!hasParsedAddress) {
+    chrome.storage.sync.get(null, obj => {
+      const objKeys = Object.keys(obj);
+      const newStore = {};
+      if (objKeys.length > 0) {
+        objKeys.forEach(item => {
+          if (isAddress(item)) {
+            newStore[toChecksumAddress(item)] = obj[item];
+            chrome.storage.sync.remove(item);
+          } else {
+            newStore[item] = obj[item];
+          }
+        });
+        locStore.set('doneReparsingAddress', true);
+        chrome.storage.sync.set(newStore);
+      }
+    });
+  }
+
+  // redo notifications in cx storage
+  if (!hasParsedNotifications) {
+    const newNotifications = {};
+    const notifications = locStore.get('notifications');
+    Object.keys(notifications).forEach(item => {
+      if (
+        newNotifications.hasOwnProperty(toChecksumAddress(item)) &&
+        notifications[item]
+      ) {
+        newNotifications[toChecksumAddress(item)] = newNotifications[
+          toChecksumAddress(item)
+        ].concat(notifications[item]);
+      } else {
+        newNotifications[toChecksumAddress(item)] = notifications[item];
+      }
+    });
+    locStore.set('notifications', newNotifications);
+  }
 }
 
 function querycB(tab) {

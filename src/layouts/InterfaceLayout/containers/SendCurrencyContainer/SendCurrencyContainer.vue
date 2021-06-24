@@ -20,6 +20,7 @@
             <div class="title">
               <h4>{{ $t('sendTx.amount') }}</h4>
               <p
+                v-show="txTo"
                 class="title-button prevent-user-select"
                 @click="sendEntireBalance"
               >
@@ -67,7 +68,7 @@
           </div>
           <div class="fee-value">
             <div class="gwei">
-              {{ displayedGasPrice(actualGasPrice) }}
+              {{ displayedGasPrice }}
               {{ $t('common.gas.gwei') }}
               <!--(Economic)-->
             </div>
@@ -148,7 +149,7 @@
     <div class="submit-button-container">
       <div
         :class="[
-          validInputs ? '' : 'disabled',
+          validInputs && isValidGasLimit ? '' : 'disabled',
           'submit-button large-round-button-green-filled'
         ]"
         @click="submitTransaction"
@@ -173,7 +174,6 @@ import ethUnit from 'ethjs-unit';
 import utils from 'web3-utils';
 import fetch from 'node-fetch';
 import DropDownAddressSelector from '@/components/DropDownAddressSelector';
-import { getGasBasedOnType } from '@/helpers/gasMultiplier';
 
 export default {
   components: {
@@ -227,10 +227,6 @@ export default {
     getBalance: {
       type: Function,
       default: function () {}
-    },
-    highestGas: {
-      type: String,
-      default: '0'
     }
   },
   data() {
@@ -258,14 +254,14 @@ export default {
       'online',
       'gasLimitWarning'
     ]),
-    actualGasPrice() {
-      return getGasBasedOnType(this.gasPrice);
+    currency() {
+      return this.selectedCurrency.symbol;
     },
     showGasWarning() {
-      return this.actualGasPrice >= this.gasLimitWarning;
+      return this.gasPrice >= this.gasLimitWarning;
     },
     txFee() {
-      return new BigNumber(ethUnit.toWei(this.actualGasPrice, 'gwei')).times(
+      return new BigNumber(ethUnit.toWei(this.gasPrice, 'gwei')).times(
         this.gasLimit || 0
       );
     },
@@ -350,7 +346,7 @@ export default {
       return (
         this.isValidAmount.valid &&
         this.isValidAddress &&
-        new BigNumber(this.gasLimit).gte(0) &&
+        new BigNumber(this.gasLimit).gte(-1) &&
         Misc.validateHexString(this.toData)
       );
     },
@@ -376,14 +372,18 @@ export default {
       );
     },
     txTo() {
-      return this.isToken
-        ? this.selectedCurrency.address.toLowerCase()
-        : this.hexAddress.toLowerCase().trim();
+      if (this.selectedCurrency || this.hexAddress) {
+        return this.isToken
+          ? this.selectedCurrency.address?.toLowerCase()
+          : this.hexAddress?.toLowerCase().trim();
+      }
+      return '';
     },
     multiWatch() {
       return (
         this.toValue,
         this.isValidAddress,
+        this.address,
         this.toData,
         this.selectedCurrency,
         new Date().getTime() / 1000
@@ -398,6 +398,16 @@ export default {
           .toString();
       }
       return '--';
+    },
+    displayedGasPrice() {
+      const newVal = this.gasPrice.toString();
+      const showMore = `~${new BigNumber(newVal).toString()}`;
+      const showSome = `~${new BigNumber(newVal).toFixed(2).toString()}`;
+      return newVal.includes('.')
+        ? new BigNumber(newVal).lt(1)
+          ? showMore
+          : showSome
+        : newVal;
     }
   },
   watch: {
@@ -416,12 +426,6 @@ export default {
     if (this.online && this.network.type.name === 'ETH') this.getEthPrice();
   },
   methods: {
-    displayedGasPrice(val) {
-      const newVal = val.toString();
-      return newVal.toString().includes('.')
-        ? `~ ${new BigNumber(newVal).toFixed(2).toString()}`
-        : newVal;
-    },
     clear() {
       this.toData = '';
       this.toValue = '0';
@@ -469,20 +473,31 @@ export default {
     openSettings() {
       this.$eventHub.$emit('open-settings');
     },
-    sendEntireBalance() {
+    async sendEntireBalance() {
       if (this.isToken) this.toValue = this.selectedCurrency.balance;
-      else
-        this.toValue =
-          this.balanceDefault > 0
-            ? this.balanceDefault.minus(
-                ethUnit.fromWei(
-                  new BigNumber(ethUnit.toWei(this.actualGasPrice, 'gwei'))
-                    .times(this.gasLimit)
-                    .toString(),
-                  'ether'
+      else {
+        const coinbase = await this.web3.eth.getCoinbase();
+        const params = {
+          from: coinbase,
+          value: ethUnit.toWei(this.balanceDefault, 'ether'),
+          data: this.txData,
+          to: this.txTo
+        };
+        this.web3.eth.estimateGas(params).then(gasLimit => {
+          this.gasLimit = gasLimit;
+          this.toValue =
+            this.balanceDefault > 0
+              ? this.balanceDefault.minus(
+                  ethUnit.fromWei(
+                    new BigNumber(ethUnit.toWei(this.gasPrice, 'gwei'))
+                      .times(gasLimit)
+                      .toString(),
+                    'ether'
+                  )
                 )
-              )
-            : 0;
+              : 0;
+        });
+      }
     },
     getTokenTransferABI(amount, decimals) {
       const jsonInterface = [
@@ -513,8 +528,8 @@ export default {
         from: coinbase,
         value: this.txValue,
         to: this.txTo,
-        actualGasPrice: Misc.sanitizeHex(
-          ethUnit.toWei(this.actualGasPrice, 'gwei').toString(16)
+        gasPrice: Misc.sanitizeHex(
+          ethUnit.toWei(this.gasPrice, 'gwei').toString(16)
         ),
         data: this.txData
       };
@@ -536,9 +551,6 @@ export default {
         const nonce = await this.web3.eth.getTransactionCount(coinbase);
         const raw = {
           nonce: Misc.sanitizeHex(new BigNumber(nonce).toString(16)),
-          actualGasPrice: Misc.sanitizeHex(
-            ethUnit.toWei(this.actualGasPrice, 'gwei').toString(16)
-          ),
           gasLimit: Misc.sanitizeHex(new BigNumber(this.gasLimit).toString(16)),
           to: this.txTo,
           value: this.txValue,

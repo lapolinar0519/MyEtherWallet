@@ -108,6 +108,10 @@ const checkErrorJson = (results, source) => {
   ) {
     throw Error('Please try a different dex. Problem calculating gas Limit.');
   }
+  if (results.msg === 'Unable to estimate gas price') {
+    Toast.responseHandler(results.error.message, 3);
+    throw Error('abort');
+  }
   if (isJson(results.error.message)) {
     throw Error(JSON.stringify(results.error.message));
   }
@@ -143,6 +147,15 @@ const handleOrThrow = (e, source) => {
     ) {
       Toast.responseHandler(e.message, 3);
       return;
+    } else if (e.message.includes('insufficient funds for transfer')) {
+      Toast.responseHandler(e.message, 3);
+      return;
+    } else if (
+      e.message.includes('execution reverted') &&
+      source === 'eth_estimateGasList'
+    ) {
+      Toast.responseHandler(e.message, 3);
+      throw Error('abort');
     }
   }
   throw e;

@@ -151,6 +151,10 @@ const ethercore = {
   path: "m/44'/466'/0'/0",
   label: 'EtherCore'
 };
+const avalancheC = {
+  path: "m/44'/60'",
+  label: 'Avax C-chain'
+};
 export {
   ethereum,
   ethereumClassic,
@@ -189,5 +193,6 @@ export {
   dexon,
   lightstreamsNetwork,
   mintmeComCoin,
-  ethercore
+  ethercore,
+  avalancheC
 };

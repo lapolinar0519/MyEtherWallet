@@ -1,6 +1,25 @@
 const exec = require('child_process').exec;
 
-const AUDIT_EXCEPTIONS = ['decompress', 'http-proxy', 'findings', 'elliptic', 'dot-prop', 'serialize-javascript', 'handlebars', 'cryptiles', 'bl'];
+const AUDIT_EXCEPTIONS = [
+  'decompress',
+  'http-proxy',
+  'findings',
+  'elliptic',
+  'dot-prop',
+  'serialize-javascript',
+  'handlebars',
+  'cryptiles',
+  'bl',
+  'axios',
+  'xmlhttprequest-ssl',
+  'url-parse', // added 5-10-21
+  'underscore', // added 5-10-21
+  'lodash', // added 5-10-21,
+  'dns-packet', // added 5-25-21 (could be related to an @ensdomains internal dependency)
+  'normalize-url', // added 6/23/21
+  'css-what', // added 6/23/21
+  'trim-newlines' // added 6/23/21
+];
 
 const execute = (command, callback) => {
   exec(

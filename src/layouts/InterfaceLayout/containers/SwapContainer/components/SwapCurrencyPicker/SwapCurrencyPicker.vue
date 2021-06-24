@@ -10,27 +10,26 @@
         @click="openDropdown"
       >
         <p></p>
-        <div
-          v-if="!iconFetcher(selectedCurrency.symbol)"
-          class="name-and-icon-container"
-        >
+        <div v-if="!selectedCurrency.icon" class="name-and-icon-container">
           <span
-            :class="['cc', getIcon(selectedCurrency.symbol), 'cc-icon']"
-            class="currency-symbol"
+            :class="[
+              'cc',
+              getIcon(selectedCurrency.symbol),
+              'cc-icon',
+              'currency-symbol'
+            ]"
           />
           <span class="pad-it">{{ selectedCurrency.symbol }} </span>
           <span class="subname">- {{ selectedCurrency.name }}</span>
         </div>
-        <div
-          v-if="iconFetcher(selectedCurrency.symbol)"
-          class="name-and-icon-container"
-        >
-          <figure v-lazy-load class="token-icon">
+        <div v-if="selectedCurrency.icon" class="name-and-icon-container">
+          <div class="token-icon">
             <img
-              :src="iconFetcher(selectedCurrency.symbol)"
+              v-lazy-load
+              :src="selectedCurrency.icon"
               @error="iconFallback"
             />
-          </figure>
+          </div>
           <span class="pad-it">{{ selectedCurrency.symbol }} </span>
           <span class="subname">- {{ selectedCurrency.name }}</span>
         </div>
@@ -66,27 +65,18 @@
             @click="selectCurrency(curr)"
           >
             <p></p>
-            <div
-              v-if="!iconFetcher(curr.symbol)"
-              class="name-and-icon-container"
-            >
+            <div v-if="!curr.icon" class="name-and-icon-container">
               <span
-                v-if="!iconFetcher(curr.symbol)"
+                v-if="!curr.icon"
                 :class="['cc', getIcon(curr.symbol), 'cc-icon']"
                 class="currency-symbol"
               />
               <span class="pad-it">{{ curr.symbol }} </span>
               <span class="subname">- {{ curr.name }}</span>
             </div>
-            <div
-              v-if="iconFetcher(curr.symbol)"
-              class="name-and-icon-container"
-            >
+            <div v-if="curr.icon" class="name-and-icon-container">
               <figure v-lazy-load class="token-icon">
-                <img
-                  :data-url="iconFetcher(curr.symbol)"
-                  @error="iconFallback"
-                />
+                <img :data-url="curr.icon" @error="iconFallback" />
               </figure>
 
               <span class="pad-it">{{ curr.symbol }} </span>
@@ -106,6 +96,7 @@ import { hasIcon } from '@/partners';
 import masterFile from '@/_generated/master-file.json';
 import { toChecksumAddress } from '@/helpers/addressUtils';
 import { mapState } from 'vuex';
+import Fuse from 'fuse.js';
 
 export default {
   props: {
@@ -177,14 +168,15 @@ export default {
   },
   watch: {
     overrideCurrency(newVal) {
-      this.selectedCurrency = newVal;
+      if (Object.keys(newVal).length > 0) {
+        this.selectedCurrency = newVal;
+      }
     },
     selectedCurrency(newVal) {
       this.$emit('selectedCurrency', newVal, this.fromSource ? 'to' : 'from');
     },
     currencies(newVal) {
-      this.localCurrencies = [];
-      newVal.forEach(curr => this.localCurrencies.push(curr));
+      this.rebuildLocalCurrencyList(newVal);
     },
     search(newVal) {
       if (newVal !== '') {
@@ -198,15 +190,24 @@ export default {
             }
           }
         });
+        const options = {
+          includeScore: true,
+          findAllMatches: true,
+          keys: ['symbol', 'name']
+        };
+        const fuse = new Fuse(this.localCurrencies, options);
+        const result = fuse.search(newVal);
+        this.localCurrencies = result.map(item => {
+          return item.item;
+        });
       } else {
-        this.localCurrencies = [];
-        this.currencies.forEach(curr => this.localCurrencies.push(curr));
+        this.rebuildLocalCurrencyList(this.currencies);
       }
     }
   },
   mounted() {
     if (this.currencies) {
-      this.currencies.forEach(curr => this.localCurrencies.push(curr));
+      this.rebuildLocalCurrencyList(this.currencies);
     }
     if (this.defaultValue.symbol && this.defaultValue.name) {
       this.selectedCurrency = this.defaultValue;
@@ -219,6 +220,13 @@ export default {
     }
   },
   methods: {
+    rebuildLocalCurrencyList(values) {
+      this.localCurrencies = [];
+      values.forEach(curr => {
+        curr.icon = this.iconFetcher(curr.symbol);
+        this.localCurrencies.push(curr);
+      });
+    },
     iconFallback(evt) {
       evt.target.src = this.network.type.icon;
     },
@@ -229,13 +237,13 @@ export default {
         if (!address) {
           try {
             // eslint-disable-next-line
-             return require(`@/assets/images/currency/coins/AllImages/${tok}.svg`);
+            return require(`@/assets/images/currency/coins/AllImages/${tok}.svg`);
           } catch (e) {
             if (this.getIcon(tok)) {
               return false;
             }
             // eslint-disable-next-line
-              return require(`@/assets/images/icons/web-solution.svg`);
+            return require(`@/assets/images/icons/web-solution.svg`);
           }
         }
         const token = this.networkTokens[toChecksumAddress(address)];

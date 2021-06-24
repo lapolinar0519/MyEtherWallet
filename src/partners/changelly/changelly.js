@@ -20,11 +20,18 @@ const errorLogger = debug('v5:partners-changelly');
 const disabled = [];
 
 function checkAndChange(value) {
+  if (!value) return value;
   if (value === 'USDT Omni') {
     return 'usdt';
   }
   if (value === 'USDT') {
     return 'usdt20';
+  }
+  if (value.toLowerCase() === 'repv2') {
+    return 'rep';
+  }
+  if (value.toLowerCase() === 'rep') {
+    return 'REPV2';
   }
   return value;
 }
@@ -98,7 +105,10 @@ export default class Changelly {
       return false;
     }
     if (this.isValidNetwork) {
-      return this.currencies[fromCurrency] && this.currencies[toCurrency];
+      return (
+        this.currencies[fromCurrency]?.enabledFrom &&
+        this.currencies[toCurrency]?.enabledTo
+      );
     }
     return false;
   }
@@ -139,15 +149,24 @@ export default class Changelly {
           });
         }, 20000);
 
-        const changellyDetails = await changellyCalls.getFixRate(
-          fromCurrency,
-          toCurrency,
-          fromValue,
-          this.network
-        );
+        const changellyDetails = await Promise.all([
+          changellyCalls.getPairsParams(
+            checkAndChange(fromCurrency).toLowerCase(),
+            checkAndChange(toCurrency).toLowerCase(),
+            fromValue,
+            this.network
+          ),
+          changellyCalls.getFixRate(
+            checkAndChange(fromCurrency).toLowerCase(),
+            checkAndChange(toCurrency).toLowerCase(),
+            fromValue,
+            this.network
+          )
+        ]);
+
         clearTimeout(timeout);
 
-        if (!Array.isArray(changellyDetails)) {
+        if (!Array.isArray(changellyDetails[1])) {
           return {
             fromCurrency,
             toCurrency,
@@ -160,10 +179,10 @@ export default class Changelly {
           fromCurrency,
           toCurrency,
           provider: this.name,
-          minValue: changellyDetails[0].min,
-          maxValue: changellyDetails[0].max,
-          rate: changellyDetails[0].result,
-          rateId: changellyDetails[0].id
+          minValue: changellyDetails[0][0].minAmountFixed,
+          maxValue: changellyDetails[0][0].maxAmountFixed,
+          rate: changellyDetails[1][0].result,
+          rateId: changellyDetails[1][0].id
         });
       } catch (e) {
         return {
@@ -182,16 +201,17 @@ export default class Changelly {
 
   async getMarketRate(fromCurrency, toCurrency, fromValue) {
     try {
+      let useAsMax = false;
       const changellyDetails = await Promise.all([
         changellyCalls.getMin(
-          fromCurrency,
-          toCurrency,
+          checkAndChange(fromCurrency).toLowerCase(),
+          checkAndChange(toCurrency).toLowerCase(),
           fromValue,
           this.network
         ),
         changellyCalls.getRate(
-          fromCurrency,
-          toCurrency,
+          checkAndChange(fromCurrency).toLowerCase(),
+          checkAndChange(toCurrency).toLowerCase(),
           fromValue,
           this.network
         )
@@ -202,13 +222,23 @@ export default class Changelly {
         .plus(new BigNumber(changellyDetails[0]))
         .toFixed();
 
-      const estValueResponse = changellyDetails[1][0];
-
+      let estValueResponse = changellyDetails[1][0];
+      if (!estValueResponse.rate) {
+        useAsMax = new BigNumber(minAmount).lt(fromValue);
+        const reRequestRate = await changellyCalls.getRate(
+          checkAndChange(fromCurrency).toLowerCase(),
+          checkAndChange(toCurrency).toLowerCase(),
+          minAmount,
+          this.network
+        );
+        estValueResponse = reRequestRate[0];
+      }
       return {
         fromCurrency,
         toCurrency,
         provider: this.name,
         minValue: minAmount,
+        maxValue: useAsMax ? fromValue : 0,
         rate: estValueResponse.rate
       };
     } catch (e) {
@@ -236,7 +266,7 @@ export default class Changelly {
   }
 
   getUpdatedFromCurrencyEntries(value, collectMap) {
-    if (this.currencies[value.symbol]) {
+    if (this.currencies[value.symbol]?.enabledFrom) {
       for (const prop in this.currencies) {
         if (this.currencies[prop])
           collectMap.set(prop, {
@@ -248,7 +278,7 @@ export default class Changelly {
   }
 
   getUpdatedToCurrencyEntries(value, collectMap) {
-    if (this.currencies[value.symbol]) {
+    if (this.currencies[value.symbol]?.enabledTo) {
       for (const prop in this.currencies) {
         if (this.currencies[prop])
           collectMap.set(prop, {

@@ -14,7 +14,8 @@ const getSupportedCurrencies = async network => {
       for (let i = 0; i < currencyList.length; i++) {
         if (
           !requireExtraId.includes(currencyList[i].name.toUpperCase()) &&
-          currencyList[i].enabled
+          currencyList[i].enabled &&
+          (currencyList[i].enabledTo || currencyList[i].enabledFrom)
         ) {
           if (
             currencyList[i].extraIdName === null ||
@@ -24,6 +25,8 @@ const getSupportedCurrencies = async network => {
               symbol: currencyList[i].name.toUpperCase(),
               name: currencyList[i].fullName,
               fixRateEnabled: currencyList[i].fixRateEnabled,
+              enabledTo: currencyList[i].enabledTo,
+              enabledFrom: currencyList[i].enabledFrom,
               address: currencyList[i].contractAddress
                 ? currencyList[i].contractAddress
                 : null
@@ -36,6 +39,11 @@ const getSupportedCurrencies = async network => {
             if (currencyList[i].name === 'usdt20') {
               details.symbol = 'USDT';
               details.name = 'Tether USD';
+            }
+            if (currencyList[i].name === 'rep') {
+              currencyList[i].name = 'REPV2';
+              details.symbol = 'REPV2';
+              details.name = 'Auger V2';
             }
             currencyDetails[details.symbol] = details;
             tokenDetails[details.symbol] = details;

@@ -239,6 +239,10 @@ export default {
             {
               text: 'footer.press-kit.header',
               to: '/press-kit'
+            },
+            {
+              text: 'footer.generate-eth2',
+              to: '/generate-eth2-keystore'
             }
           ]
         },
@@ -274,6 +278,10 @@ export default {
             {
               text: 'common.help-center',
               href: 'https://kb.myetherwallet.com'
+            },
+            {
+              text: 'footer.security-policy',
+              to: '/security-policy'
             }
           ]
         }

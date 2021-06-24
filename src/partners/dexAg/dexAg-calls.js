@@ -73,7 +73,12 @@ const estimateGas = async (txs, from) => {
     }
     return results.result;
   } catch (e) {
+    const re = new RegExp('([0-9]+)');
+    const reResult = re[Symbol.match](e.message);
     utils.handleOrThrow(e);
+    if (reResult) {
+      return reResult[0];
+    }
   }
 };
 
@@ -96,11 +101,11 @@ const createTransaction = async transactionParams => {
   }
 };
 
-const supportedDexes = async () => {
+const excludedDexes = async () => {
   try {
     const results = await post(
       buildPath(),
-      utils.buildPayload(dexAgMethods.supportedDexes, {})
+      utils.buildPayload(dexAgMethods.excludedDexes, {})
     );
     if (results.error) {
       utils.checkErrorJson(results);
@@ -116,6 +121,6 @@ export default {
   getSupportedCurrencies,
   getPrice,
   createTransaction,
-  supportedDexes,
+  excludedDexes,
   estimateGas
 };
